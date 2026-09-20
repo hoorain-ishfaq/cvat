@@ -449,6 +449,15 @@ function build(): CVATCore {
                     },
                 },
             },
+            classCounts: {
+                async get(taskID: number) {
+                    const result = await PluginRegistry.apiWrapper(
+                        cvat.analytics.classCounts.get,
+                        taskID,
+                    );
+                    return result;
+                },
+            },
         },
         requests: {
             async list() {

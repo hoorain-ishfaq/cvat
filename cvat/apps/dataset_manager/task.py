@@ -5,6 +5,7 @@
 
 import io
 import itertools
+import logging
 from collections import OrderedDict, defaultdict
 from collections.abc import Callable, Generator, Sequence
 from contextlib import nullcontext
@@ -1278,11 +1279,50 @@ def get_job_data(pk, *, streaming: bool = False):
     return annotation.data
 
 
+_logger = logging.getLogger(__name__)
+
+
+def _notify_class_counts_changed(*, job_id: int | None = None, task_id: int | None = None) -> None:
+    """Tell the analytics app that a task's annotations changed.
+
+    Scheduled with on_commit so subscribers never re-read the counts before the
+    new rows are visible, and fully guarded so a notification problem can never
+    fail an annotation save.
+    """
+    from django.apps import apps
+
+    if not apps.is_installed("cvat.apps.test"):
+        return
+
+    def _publish() -> None:
+        try:
+            from cvat.apps.test.notifications import publish_class_counts_changed
+
+            resolved = task_id
+            if resolved is None:
+                resolved = (
+                    models.Job.objects.filter(pk=job_id)
+                    .values_list("segment__task_id", flat=True)
+                    .first()
+                )
+
+            if resolved is not None:
+                publish_class_counts_changed(resolved)
+        except Exception:  # pylint: disable=broad-except
+            _logger.warning("Could not notify about class count changes", exc_info=True)
+
+    try:
+        transaction.on_commit(_publish)
+    except Exception:  # pylint: disable=broad-except
+        _logger.warning("Could not schedule a class count notification", exc_info=True)
+
+
 @silk_profile(name="POST job data")
 @transaction.atomic
 def put_job_data(pk, data: AnnotationIR | dict, *, db_job: models.Job | None = None):
     annotation = JobAnnotation(pk, db_job=db_job)
     annotation.put(data)
+    _notify_class_counts_changed(job_id=pk)
 
     return annotation.data
 
@@ -1299,8 +1339,11 @@ def patch_job_data(
     elif action == PatchAction.UPDATE:
         annotation.update(data)
     elif action == PatchAction.DELETE:
-        return annotation.delete(data)
+        deleted = annotation.delete(data)
+        _notify_class_counts_changed(job_id=pk)
+        return deleted
 
+    _notify_class_counts_changed(job_id=pk)
     return annotation.data
 
 
@@ -1309,6 +1352,7 @@ def patch_job_data(
 def delete_job_data(pk, *, db_job: models.Job | None = None):
     annotation = JobAnnotation(pk, db_job=db_job)
     annotation.delete()
+    _notify_class_counts_changed(job_id=pk)
 
 
 @db_utils.transaction_with_repeatable_read()
@@ -1345,6 +1389,7 @@ def get_task_data(pk):
 def put_task_data(pk, data):
     annotation = TaskAnnotation(pk)
     annotation.put(data)
+    _notify_class_counts_changed(task_id=pk)
 
     return annotation.data
 
@@ -1359,6 +1404,7 @@ def patch_task_data(pk, data, action):
         annotation.update(data)
     elif action == PatchAction.DELETE:
         annotation.delete(data)
+    _notify_class_counts_changed(task_id=pk)
 
     return annotation.data
 
@@ -1368,6 +1414,7 @@ def patch_task_data(pk, data, action):
 def delete_task_data(pk):
     annotation = TaskAnnotation(pk)
     annotation.delete()
+    _notify_class_counts_changed(task_id=pk)
 
 
 @db_utils.transaction_with_repeatable_read()

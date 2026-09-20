@@ -91,6 +91,10 @@ module.exports = (env, argv = {}) => {
                 target: env && env.API_URL,
                 secure: false,
                 changeOrigin: true,
+                // Required so WebSocket upgrades (e.g. the class statistics
+                // live updates) reach the backend instead of being served by
+                // the dev server itself.
+                ws: true,
                 onProxyReq: (proxyReq) => {
                     proxyReq.setHeader('X-FORWARDED-HOST', `${host}:${port}`);
                 },

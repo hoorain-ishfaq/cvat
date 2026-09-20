@@ -8,6 +8,7 @@ import {
 } from './server-request-types';
 import PluginRegistry from './plugins';
 import serverProxy from './server-proxy';
+import { SerializedClassCounts } from './server-response-types';
 import lambdaManager from './lambda-manager';
 import AnnotationFormats from './annotation-formats';
 import logger from './logger';
@@ -184,6 +185,9 @@ export default interface CVATCore {
         };
         events: {
             export: (filter: AnalyticsEventsFilter) => Promise<string>;
+        };
+        classCounts: {
+            get: (taskID: number) => Promise<SerializedClassCounts>;
         };
     };
     frames: {

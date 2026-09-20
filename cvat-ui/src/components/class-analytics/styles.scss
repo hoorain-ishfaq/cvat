@@ -1,0 +1,73 @@
+// Copyright (C) CVAT.ai Corporation
+//
+// SPDX-License-Identifier: MIT
+
+@import 'base';
+
+.cvat-class-analytics-page {
+    padding-top: $grid-unit-size * 2;
+    padding-bottom: $grid-unit-size * 4;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.cvat-class-analytics-header {
+    margin-bottom: $grid-unit-size * 2;
+
+    h4 {
+        margin-bottom: 0;
+    }
+}
+
+.cvat-class-analytics-title-row {
+    display: flex;
+    align-items: center;
+    gap: $grid-unit-size * 2;
+}
+
+.cvat-class-analytics-live-badge {
+    position: relative;
+    top: -$grid-unit-size * 0.5;
+}
+
+.cvat-class-analytics-summary {
+    margin-bottom: $grid-unit-size * 2;
+}
+
+.cvat-class-analytics-chart-card {
+    .cvat-class-analytics-chart {
+        position: relative;
+        height: $grid-unit-size * 45;
+        width: 100%;
+    }
+}
+
+.cvat-class-analytics-empty-hint {
+    margin-bottom: $grid-unit-size * 2;
+}
+
+.cvat-class-analytics-loading {
+    display: flex;
+    justify-content: center;
+    padding: $grid-unit-size * 6 0;
+}
+
+.cvat-class-analytics-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $grid-unit-size * 2;
+    margin-top: $grid-unit-size * 2;
+}
+
+.cvat-class-analytics-legend-item {
+    display: inline-flex;
+    align-items: center;
+}
+
+.cvat-class-analytics-legend-swatch {
+    display: inline-block;
+    width: $grid-unit-size * 1.5;
+    height: $grid-unit-size * 1.5;
+    border-radius: 2px;
+    margin-right: $grid-unit-size;
+}

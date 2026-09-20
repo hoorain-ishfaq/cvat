@@ -17,7 +17,7 @@ import {
     SerializedRegister, SerializedJob, SerializedGuide, SerializedAsset, SerializedAPISchema,
     SerializedInvitationData, SerializedCloudStorage, SerializedFramesMetaData, SerializedCollection,
     SerializedRequest, SerializedJobValidationLayout, SerializedTaskValidationLayout, SerializedConsensusSettingsData,
-    SerializedApiToken, SerializedUserGrowthData,
+    SerializedApiToken, SerializedUserGrowthData, SerializedClassCounts,
 } from './server-response-types';
 import {
     SerializedQualityConflictData, SerializedQualityReportData,
@@ -2514,6 +2514,20 @@ async function createAsset(file: File, guideId: number): Promise<SerializedAsset
     }
 }
 
+async function getClassCounts(taskID: number): Promise<SerializedClassCounts> {
+    const { backendAPI } = config;
+
+    try {
+        const response = await Axios.get(`${backendAPI}/test/class-counts`, {
+            params: { task_id: taskID },
+        });
+
+        return response.data;
+    } catch (errorData) {
+        throw generateError(errorData);
+    }
+}
+
 async function getQualitySettings(
     filter: APIQualitySettingsFilter,
     aggregate?: boolean,
@@ -2911,6 +2925,9 @@ export default Object.freeze({
                 update: updateQualityRequirement,
                 delete: deleteQualityRequirement,
             }),
+        }),
+        classCounts: Object.freeze({
+            get: getClassCounts,
         }),
     }),
 
