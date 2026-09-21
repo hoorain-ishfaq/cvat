@@ -90,7 +90,10 @@ module.exports = (env, argv = {}) => {
                     ),
                 target: env && env.API_URL,
                 secure: false,
-                changeOrigin: true,
+                // false so the browser Host (localhost:3000) reaches traefik, which then sets
+                // X-Forwarded-Host to it. With true, Django saw localhost:8080 and the
+                // CSRF origin check failed against the browser Origin of localhost:3000.
+                changeOrigin: false,
                 // Required so WebSocket upgrades (e.g. the class statistics
                 // live updates) reach the backend instead of being served by
                 // the dev server itself.
