@@ -468,3 +468,17 @@ export interface SerializedTaskValidationLayout extends SerializedJobValidationL
     validation_frames?: number[];
     disabled_frames?: number[];
 }
+
+export interface SerializedClassCount {
+    label_id: number;
+    label_name: string;
+    color: string;
+    image_count: number;
+}
+
+export interface SerializedClassCounts {
+    task_id: number;
+    total_images: number;
+    annotated_images: number;
+    classes: SerializedClassCount[];
+}

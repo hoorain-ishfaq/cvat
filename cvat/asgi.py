@@ -39,3 +39,20 @@ if debug.is_debugging_enabled():
             return await super().handle(*args, **kwargs)
 
     application = DebuggerApp()
+
+
+# Route by protocol. HTTP keeps going to the Django application exactly as
+# before; only the websocket scope is handled separately, so the REST API is
+# untouched. Implemented directly against ASGI because CVAT does not depend on
+# Django Channels and uvicorn already speaks the WebSocket protocol.
+_http_application = application
+
+
+async def application(scope, receive, send):  # noqa: F811
+    if scope["type"] == "websocket":
+        from cvat.apps.test.consumers import websocket_application
+
+        await websocket_application(scope, receive, send)
+        return
+
+    await _http_application(scope, receive, send)

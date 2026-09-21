@@ -596,6 +596,15 @@ export default function implementAPI(cvat: CVATCore): CVATCore {
             );
             return requirements;
         });
+    implementationMixin(cvat.analytics.classCounts.get, async (
+        taskID: number,
+    ): ReturnType<CVATCore['analytics']['classCounts']['get']> => {
+        if (!isInteger(taskID)) {
+            throw new ArgumentError(`Task ID must be an integer, but got ${typeof taskID}`);
+        }
+
+        return serverProxy.analytics.classCounts.get(taskID);
+    });
     implementationMixin(cvat.analytics.events.export, async (
         filter: AnalyticsEventsFilter,
     ): ReturnType<CVATCore['analytics']['events']['export']> => {
